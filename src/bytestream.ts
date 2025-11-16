@@ -176,7 +176,7 @@ export class ByteStream {
    * @param {Number} count Count of NullVInts to write.
    */
   writeNullVInt(count = 1) {
-    for (var i = 0; i < count; i++)
+    for (let i = 0; i < count; i++)
       this.writeByte(0x7F)
   }
 
@@ -205,7 +205,7 @@ export class ByteStream {
    * @param {String} value Your value to write.
    */
   writeString(value: string) {
-    let strlen = value.length
+    const strlen = value.length
     if (value == null || strlen > 90000) {
       this.writeInt(0)
       return

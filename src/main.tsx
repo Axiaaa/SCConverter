@@ -10,13 +10,13 @@ const formatHex = (hex: string, spaced: boolean): string => {
 }
 
 const stringToHex = (str: string): string => {
-  let bs = new ByteStream();
+  const bs = new ByteStream();
   bs.writeString(str)
   return bs.getHex();
 }
 
 const hexToString = (hex: string): string => {
-  let bs = new ByteStream()
+  const bs = new ByteStream()
   bs.writeInt(hex.length)
   bs.writeHexa(hex);
   bs.offset = 0
@@ -24,10 +24,10 @@ const hexToString = (hex: string): string => {
 }
 
 const hexToVInt = (hex: string): string => {
-  let bs = new ByteStream();
+  const bs = new ByteStream();
   bs.writeHexa(hex);
   bs.offset = 0;
-  let val = bs.readVInt();
+  const val = bs.readVInt();
   if (val == -64)
     return "-1"
   else 
@@ -35,22 +35,22 @@ const hexToVInt = (hex: string): string => {
 }
 
 const vIntToHex = (vint: string): string => {
-  let bs = new ByteStream();
+  const bs = new ByteStream();
   bs.writeVInt(Number(vint))
   return bs.getHex(true)
 }
 
 const IntToHex = (nbr: string): string => {
-  let bs = new ByteStream();
+  const bs = new ByteStream();
 
-  let long = nbr.split(/[ ,]+/);
+  const long = nbr.split(/[ ,]+/);
   if (long.length != 0)
   {
     bs.writeLong(Number(long[0]), Number(long[1]));
     return bs.getHex(true)
   }
 
-  let num = Number(nbr);
+  const num = Number(nbr);
   if (num > 2147483647 || num < -2147483648) {
     bs.writeLongLong(num);
   } else {
@@ -61,7 +61,7 @@ const IntToHex = (nbr: string): string => {
 
 const HexToInt = (hex: string): string => {
   console.log(hex);
-  let bs = new ByteStream();
+  const bs = new ByteStream();
   bs.writeHexa(hex);
   bs.offset = 0;
   let str = "Long: "
