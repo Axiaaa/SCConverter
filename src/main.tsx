@@ -2,84 +2,83 @@ import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { ByteStream } from './bytestream';
+import { AboutPage } from './about'
+import { StructureToHexPage } from './structuretohex'
 
-const formatHex = (hex: string, spaced: boolean): string => {
-  const cleaned = hex.replace(/\s/g, '');
-  if (!spaced) return cleaned;
-  return cleaned.match(/.{1,2}/g)?.join(' ') || cleaned;
-}
-
-const stringToHex = (str: string): string => {
-  const bs = new ByteStream();
-  bs.writeString(str)
-  return bs.getHex();
-}
-
-const hexToString = (hex: string): string => {
-  const bs = new ByteStream()
-  bs.writeInt(hex.length)
-  bs.writeHexa(hex);
-  bs.offset = 0
-  return bs.readString();
-}
-
-const hexToVInt = (hex: string): string => {
-  const bs = new ByteStream();
-  bs.writeHexa(hex);
-  bs.offset = 0;
-  const val = bs.readVInt();
-  if (val == -64)
-    return "-1"
-  else 
-    return val.toString()
-}
-
-const vIntToHex = (vint: string): string => {
-  const bs = new ByteStream();
-  bs.writeVInt(Number(vint))
-  return bs.getHex(true)
-}
-
-const IntToHex = (nbr: string): string => {
-  const bs = new ByteStream();
-
-  const long = nbr.split(/[ ,]+/);
-  if (long.length != 0)
-  {
-    bs.writeLong(Number(long[0]), Number(long[1]));
-    return bs.getHex(true)
-  }
-
-  const num = Number(nbr);
-  if (num > 2147483647 || num < -2147483648) {
-    bs.writeLongLong(num);
-  } else {
-    bs.writeInt(num);
-  }
-  return bs.getHex(true);
-}
-
-const HexToInt = (hex: string): string => {
-  console.log(hex);
-  const bs = new ByteStream();
-  bs.writeHexa(hex);
-  bs.offset = 0;
-  let str = "Long: "
-  str += bs.readLong().toString()
-  str += "\n"
-  bs.offset = 0;
-  str += "Int: "
-  str += bs.readInt().toString()
-  return str;
-}
-
-const App: React.FC = () => {
+const ConverterPage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
   const [hexValue, setHexValue] = useState('');
   const [stringValue, setStringValue] = useState('');
   const [vIntValue, setVIntValue] = useState('');
   const [IntValue, setIntValue] = useState('')
   const [activeInput, setActiveInput] = useState<'hex' | 'string' | 'vint' | 'int' | null>(null);
   const [hexSpaced, setHexSpaced] = useState(false);
+
+  const formatHex = (hex: string, spaced: boolean): string => {
+    const cleaned = hex.replace(/\s/g, '');
+    if (!spaced) return cleaned;
+    return cleaned.match(/.{1,2}/g)?.join(' ') || cleaned;
+  }
+
+  const stringToHex = (str: string): string => {
+    const bs = new ByteStream();
+    bs.writeString(str)
+    return bs.getHex();
+  }
+
+  const hexToString = (hex: string): string => {
+    const bs = new ByteStream()
+    bs.writeInt(hex.length)
+    bs.writeHexa(hex);
+    bs.offset = 0
+    return bs.readString();
+  }
+
+  const hexToVInt = (hex: string): string => {
+    const bs = new ByteStream();
+    bs.writeHexa(hex);
+    bs.offset = 0;
+    const val = bs.readVInt();
+    if (val == -64)
+      return "-1"
+    else 
+      return val.toString()
+  }
+
+  const vIntToHex = (vint: string): string => {
+    const bs = new ByteStream();
+    bs.writeVInt(Number(vint))
+    return bs.getHex(true)
+  }
+
+  const IntToHex = (nbr: string): string => {
+    const bs = new ByteStream();
+    const long = nbr.split(/[ ,]+/);
+    if (long.length != 0) {
+      bs.writeLong(Number(long[0]), Number(long[1]));
+      return bs.getHex(true)
+    }
+    const num = Number(nbr);
+    if (num > 2147483647 || num < -2147483648) {
+      bs.writeLongLong(num);
+    } else {
+      bs.writeInt(num);
+    }
+    return bs.getHex(true);
+  }
+
+  const HexToInt = (hex: string): string => {
+    const bs = new ByteStream();
+    bs.writeHexa(hex);
+    bs.offset = 0;
+    let str = "Long: "
+    str += bs.readLong().toString()
+    str += "\n"
+    bs.offset = 0;
+    str += "Int: "
+    str += bs.readInt().toString()
+    return str;
+  }
+
   const clearTextZone = () => { 
     setActiveInput(null)
     setHexValue('')
@@ -136,19 +135,32 @@ const App: React.FC = () => {
         </div>
         
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-3xl shadow-2xl border border-slate-700/50 p-10 space-y-3">
-            <div className="flex justify-center">
+          <div className="flex justify-center gap-4">
+            
             <button
               onClick={() => clearTextZone()}
-              className={`px-15 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                'bg-slate-700 text-gray-300 hover:bg-linear-to-br from-blue-400 to-purple-500 mb-3 hover:shadow-lg hover:shadow-blue-500/30'
-              }`}
-              >
+              className="px-15 py-2.5 rounded-lg text-sm font-bold transition-all bg-slate-700 text-gray-300 hover:bg-linear-to-br from-blue-400 to-purple-500 mb-3 hover:shadow-lg hover:shadow-blue-500/30"
+            >
               Reset
             </button>
-            </div>
+            <button
+              onClick={() => onNavigate('structuretohex')}
+              className="px-15 py-2.5 rounded-lg text-sm font-bold transition-all bg-slate-700 text-gray-300 hover:bg-linear-to-br from-red-400 to-purple-400 mb-3 hover:shadow-lg hover:shadow-green-500/30"
+            >
+              Structure dumper
+            </button>
+            <button
+              onClick={() => onNavigate('about')}
+              className="px-15 py-2.5 rounded-lg text-sm font-bold transition-all bg-slate-700 text-gray-300 hover:bg-linear-to-br from-green-400 to-teal-500 mb-3 hover:shadow-lg hover:shadow-green-500/30"
+            >
+              About
+            </button>
+
+          </div>
+
           {/* String Input */}
           <div className="group">
-            <label className="flex text-lg font-semibold text-blue-400 mb-3  items-center gap-3">
+            <label className="flex text-lg font-semibold text-blue-400 mb-3 items-center gap-3">
               <span className="w-2.5 h-2.5 bg-blue-400 rounded-full shrink-0"></span>
               <span className="flex-1">String</span>
             </label>
@@ -188,16 +200,15 @@ const App: React.FC = () => {
                 setActiveInput('hex');
                 setHexValue(e.target.value);
               }}
-              placeholder="Enter hex values (e.g., 48656c6c6f)..."
+              placeholder="Enter hex values (e.g. 48656c6c6f)..."
               className="w-full px-5 py-4 bg-slate-900/50 border-2 border-slate-700 text-gray-100 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all font-mono text-base resize-none placeholder-gray-500"
               rows={3}
             />
           </div>
 
-
           {/* VInt Input */}
           <div className="group">
-            <label className="flex text-lg font-semibold text-purple-400 mb-3  items-center gap-3">
+            <label className="flex text-lg font-semibold text-purple-400 mb-3 items-center gap-3">
               <span className="w-2.5 h-2.5 bg-purple-400 rounded-full shrink-0"></span>
               <span className="flex-1">VInt</span>
             </label>
@@ -224,7 +235,7 @@ const App: React.FC = () => {
                 setActiveInput('int');
                 setIntValue(e.target.value);
               }}
-              placeholder="Enter VInt bytes (e.g., ac 02)..."
+              placeholder="Enter Int/Long values..."
               className="w-full px-5 py-4 bg-slate-900/50 border-2 border-slate-700 text-gray-100 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 focus:outline-none transition-all font-mono text-base resize-none placeholder-gray-500"
               rows={3}
             />
@@ -232,7 +243,25 @@ const App: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
 
+
+const App: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState<'converter' | 'about'| 'structuretohex'>('converter');
+
+  const handleNavigate = (page: string) => {
+    if (page === 'converter' || page === 'about' || page === 'structuretohex' ) {
+      setCurrentPage(page);
+    }
+  };
+
+  return (
+    <>
+      {currentPage === 'converter' && <ConverterPage onNavigate={handleNavigate} />}
+      {currentPage === 'about' && <AboutPage onNavigate={handleNavigate} />}
+      {currentPage === 'structuretohex' &&  <StructureToHexPage onNavigate={handleNavigate} />}
+    </>
   );
 };
 
